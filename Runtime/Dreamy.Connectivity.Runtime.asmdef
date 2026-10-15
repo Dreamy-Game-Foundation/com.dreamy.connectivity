@@ -1,0 +1,9 @@
+{
+  "name": "Dreamy.Connectivity.Runtime",
+  "rootNamespace": "Dreamy.Connectivity",
+  "references": [
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "noEngineReferences": true
+}

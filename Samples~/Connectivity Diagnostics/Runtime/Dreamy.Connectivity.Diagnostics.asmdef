@@ -1,0 +1,14 @@
+{
+  "name": "Dreamy.Connectivity.Diagnostics",
+  "rootNamespace": "Dreamy.Connectivity",
+  "references": [
+    "Dreamy.Connectivity.Runtime",
+    "Dreamy.Connectivity.Unity",
+    "Dreamy.Connectivity.UI",
+    "UniTask",
+    "Unity.TextMeshPro",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "noEngineReferences": false
+}

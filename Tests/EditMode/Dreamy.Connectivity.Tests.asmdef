@@ -1,0 +1,17 @@
+{
+  "name": "Dreamy.Connectivity.Tests",
+  "rootNamespace": "Dreamy.Connectivity",
+  "references": [
+    "Dreamy.Connectivity.Runtime",
+    "UniTask",
+    "Dreamy.Connectivity.UI",
+    "Dreamy.Connectivity.Unity"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Dreamy.Connectivity.Editor",
+  "rootNamespace": "Dreamy.Connectivity",
+  "references": [
+    "Dreamy.Connectivity.Runtime",
+    "Dreamy.Connectivity.Unity",
+    "Dreamy.Connectivity.UI",
+    "Dreamy.UI.Runtime",
+    "UniTask",
+    "Unity.TextMeshPro",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "noEngineReferences": false
+}
