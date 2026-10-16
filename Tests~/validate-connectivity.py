@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--compile-platforms', action='store_true')
+parser.add_argument('--allow-imported-customizations', action='store_true', help='Report host-owned imported sample edits without overwriting them.')
 args = parser.parse_args()
 root = Path.cwd()
 package = Path(__file__).resolve().parents[1]
@@ -35,14 +36,28 @@ for sample in metadata['samples']:
         if file.is_file() and file.suffix in ('.cs', '.asmdef', '.prefab', '.unity', '.meta'):
             assert file.with_name(file.name + '.meta').exists() or file.suffix == '.meta', file
             if imported.exists():
-                assert (imported / file.relative_to(directory)).read_bytes() == file.read_bytes(), ('source/import drift', file)
+                if (imported / file.relative_to(directory)).read_bytes() != file.read_bytes():
+                    if args.allow_imported_customizations: print('HOST CUSTOMIZATION retained: '+str(imported / file.relative_to(directory)))
+                    else: raise AssertionError(('source/import drift', file))
 for file in (package / 'Samples~').rglob('*.prefab'):
     text = file.read_text()
     assert not re.search(r'm_Script: \{fileID: 0\}', text), file
 assert 'Diagnostic' not in (package / 'Samples~/Connectivity Feature/Runtime/ConnectivityRoot.cs').read_text()
 # Validate declared dependencies against source-owned assembly edges.
-assert 'com.dreamy.ui' in metadata['dependencies'] and 'com.cysharp.unitask' in metadata['dependencies']
-print('PASS package boundaries, sample declarations, source/import equality and asset metadata', flush=True)
+assert 'com.cysharp.unitask' in metadata['dependencies']
+for name in ['com.dreamy.feature', 'com.dreamy.ui', 'com.unity.ugui']:
+    assert name not in metadata['dependencies'], ('UI dependency leaked into package manifest', name)
+for path in package.rglob('*.asmdef'):
+    if 'Samples~' in path.parts: continue
+    data = json.loads(path.read_text())
+    for reference in data['references']:
+        assert reference not in ['Dreamy.Connectivity.UI', 'Dreamy.UI.Runtime', 'Dreamy.UI.Presentation', 'Dreamy.Feature.Runtime', 'Unity.TextMeshPro', 'UnityEngine.UI'], (path, reference)
+for path in package.rglob('*.cs'):
+    if 'Samples~' in path.parts: continue
+    assert not re.search(r'using (Dreamy\.UI|TMPro|UnityEngine\.UI)\b', path.read_text()), path
+assert not (package/'Editor').exists() and not (package/'Integration/UI').exists()
+print('PASS UI dependencies exist only inside Samples~', flush=True)
+print('PASS package boundaries, sample declarations and asset metadata (imported customizations reported above)', flush=True)
 if args.compile_platforms:
     with tempfile.TemporaryDirectory(prefix='dreamy-connectivity-') as temp:
         temp = Path(temp)
@@ -66,7 +81,7 @@ if args.compile_platforms:
             for directory in ['Runtime','Integration/Unity']:
                 for source in (package / directory).rglob('*.cs'): ET.SubElement(items,'Compile',Include=str(source))
             for name,dll in references.items():
-                if name.startswith('Dreamy.Connectivity'): continue
+                if name.startswith('Dreamy.') or name in ['UnityEngine.UI', 'Unity.TextMeshPro']: continue
                 ref = ET.SubElement(items,'Reference',Include=name)
                 ET.SubElement(ref,'HintPath').text=str(dll)
             path=temp / (platform + '.csproj');ET.indent(project);ET.ElementTree(project).write(path,encoding='unicode')

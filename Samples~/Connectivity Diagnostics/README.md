@@ -14,3 +14,5 @@ Open `Scenes/ConnectivityDiagnostics.unity`, enter Play Mode, and use:
 Choose a state before Run Action. Changing state while an operation runs also tests loss after preflight. Diagnostic controls stay clickable while the sample popup is visible so recovery can be simulated without toggling your actual network. The production prefab uses a full-screen input blocker.
 
 Settings is hidden on unsupported desktop/Editor platforms. Test its OS behavior on an Android/iOS device. If this sandbox starts BootstrapScene when pressing Play, choose the diagnostics scene as Play Mode Start Scene or turn off Play from Bootstrap in the Dreamy toolbar.
+
+The diagnostic scene now owns a Canvas PanelManager and uses address `UI/ConnectionRetryDiagnosticsPanel` for `Prefabs/ConnectionRetryDiagnosticsPanel.prefab`, a diagnostic variant of the production Retry panel. No Retry panel is pre-instantiated. First loss creates the panel/presenter through the manager; subsequent openings reuse the cached view with a fresh presenter. Back follows the manager's normal close path and cancels recovery.

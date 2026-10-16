@@ -1,0 +1,10 @@
+{
+  "name": "Dreamy.Connectivity.Sample.Editor",
+  "references": [
+    "Dreamy.Connectivity.Feature",
+    "Dreamy.Connectivity.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

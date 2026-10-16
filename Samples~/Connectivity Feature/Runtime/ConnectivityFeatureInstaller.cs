@@ -1,16 +1,18 @@
 using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
+using Dreamy.UI;
 namespace Dreamy.Connectivity
 {
-    /// <summary>Production entry point. Call from GameInstaller after creating your Canvas/view.</summary>
     public static class ConnectivityFeatureInstaller
     {
-        public static ConnectivityFeature Install(ConnectionRetryPanel panel, ConnectivityLifecycle lifecycle,
-            IConnectivityGateway gateway = null, string targetId = "default",
+        /// <summary>Register with the game's shared factory. The UI root supplies recovery navigation.</summary>
+        public static ConnectivityFeature Install(PanelPresenterFactory factory,
+            Func<ConnectionRetryModel, IConnectionRecoveryUI> createRecoveryUI,
+            ConnectivityLifecycle lifecycle = null, IConnectivityGateway gateway = null, string targetId = "default",
             ConnectivityRequirement requirement = ConnectivityRequirement.NetworkHintOnly,
-            IConnectionSettingsGateway settings = null) =>
-            new(gateway ?? new UnityReachabilityGateway(), panel, targetId, requirement, settings, lifecycle);
+            IConnectionSettingsGateway settings = null)
+        {
+            return new ConnectivityFeature(gateway ?? new UnityReachabilityGateway(), factory, createRecoveryUI,
+                targetId, requirement, settings, lifecycle);
+        }
     }
 }

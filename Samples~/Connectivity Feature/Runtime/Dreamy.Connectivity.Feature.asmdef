@@ -5,7 +5,10 @@
     "Dreamy.Connectivity.Runtime",
     "Dreamy.Connectivity.Unity",
     "Dreamy.Connectivity.UI",
-    "UniTask"
+    "UniTask",
+    "Dreamy.UI.Runtime",
+    "Dreamy.UI.Presentation",
+    "Dreamy.Core.Runtime"
   ],
   "includePlatforms": [],
   "noEngineReferences": false

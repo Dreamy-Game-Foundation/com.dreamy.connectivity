@@ -4,13 +4,14 @@ using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Dreamy.UI;
 
 namespace Dreamy.Connectivity.Diagnostics
 {
     /// <summary>Development-only simulation controls. Never installed by Connectivity Feature.</summary>
     public sealed class ConnectivityDiagnostics : MonoBehaviour
     {
-        [SerializeField] private ConnectionRetryPanel retryPanel;
+        [SerializeField] private string retryPanelAddress = "UI/ConnectionRetryDiagnosticsPanel";
         [SerializeField] private ConnectivityLifecycle lifecycle;
         [SerializeField] private TMP_Text statusText;
         [SerializeField] private Button runButton;
@@ -38,7 +39,6 @@ namespace Dreamy.Connectivity.Diagnostics
         private int calls;
         private void OnEnable()
         {
-            gateway = new DiagnosticGateway(); feature = new ConnectivityFeature(gateway, retryPanel, lifecycle: lifecycle);
             runButton.onClick.AddListener(Run); lossButton.onClick.AddListener(Loss); recoveryButton.onClick.AddListener(Recovery);
             timeoutButton.onClick.AddListener(Timeout); serverErrorButton.onClick.AddListener(ServerError);
             unknownOutcomeButton.onClick.AddListener(Unknown); cancelButton.onClick.AddListener(Cancel);
@@ -49,8 +49,20 @@ namespace Dreamy.Connectivity.Diagnostics
             runButton.onClick.RemoveListener(Run); lossButton.onClick.RemoveListener(Loss); recoveryButton.onClick.RemoveListener(Recovery);
             timeoutButton.onClick.RemoveListener(Timeout); serverErrorButton.onClick.RemoveListener(ServerError);
             unknownOutcomeButton.onClick.RemoveListener(Unknown); cancelButton.onClick.RemoveListener(Cancel);
-            actionCancellation?.Cancel(); feature?.Dispose(); feature = null;
+            actionCancellation?.Cancel();
         }
+        private void Start()
+        {
+            gateway = new DiagnosticGateway();
+            if (!PanelManager.HasInstance)
+                throw new InvalidOperationException("Initialize diagnostics after the game's PanelManager UI bootstrap.");
+            var panels = PanelManager.Instance;
+            var factory = panels.PresenterFactory ?? new PanelPresenterFactory();
+            panels.PresenterFactory = factory;
+            feature = ConnectivityFeatureInstaller.Install(factory,
+                model => new ConnectionRetryPanelGateway(panels, retryPanelAddress, model), lifecycle, gateway);
+        }
+        private void OnDestroy() { feature?.Dispose(); feature = null; }
         private void SetMode(Mode mode) { gateway.Current = mode; feature.Service.Invalidate(); statusText.text = "Simulated state: " + mode; }
         private void Loss() => SetMode(Mode.Offline);
         private void Recovery() => SetMode(Mode.Connected);

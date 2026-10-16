@@ -1,11 +1,12 @@
 using System;
 using UnityEngine;
+using Dreamy.UI;
 using UnityEngine.UI;
 namespace Dreamy.Connectivity
 {
-    /// <summary>Canvas-based modal. May be hosted by any game UI manager; has no service lookup.</summary>
+    /// <summary>Feature panel view. Uses the shared BaseFeaturePanel prefab foundation; has no service lookup.</summary>
     [DisallowMultipleComponent]
-    public sealed class ConnectionRetryPanel : MonoBehaviour, IConnectionRecoveryView
+    public sealed class ConnectionRetryPanel : UIPanel, IConnectionRetryView
     {
         [SerializeField] private TMPro.TMP_Text titleText;
         [SerializeField] private TMPro.TMP_Text messageText;
@@ -22,25 +23,29 @@ namespace Dreamy.Connectivity
         [SerializeField] private string settingsFailedMessage = "Settings could not be opened. Change your connection manually.";
         [SerializeField] private string timeoutMessage = "The connection check took too long. Please try again.";
         [SerializeField] private string serviceMessage = "The service could not be reached. Please try again.";
+        public override bool CanBack => true;
+        public override bool CanCache => true;
+        public override UILayer Layer => UILayer.Overlay;
+        [SerializeField] private string connectionAvailableMessage = "Connection available. Press Retry to continue.";
+        [SerializeField] private string connectionUnavailableMessage = "Connection is still unavailable. Check settings and retry.";
         private bool canRetry;
         public event Action<ConnectionRecoveryDecision> DecisionRequested;
-        public event Action Closed;
         private void OnEnable()
         {
             retryButton.onClick.AddListener(Retry); settingsButton.onClick.AddListener(Settings); cancelButton.onClick.AddListener(Cancel);
         }
-        private void OnDisable()
+        protected override void OnDisable()
         {
             retryButton.onClick.RemoveListener(Retry); settingsButton.onClick.RemoveListener(Settings); cancelButton.onClick.RemoveListener(Cancel);
-            Closed?.Invoke();
+            base.OnDisable();
         }
-        private void OnDestroy() { Closed?.Invoke(); }
         private void Retry() => DecisionRequested?.Invoke(ConnectionRecoveryDecision.Retry);
         private void Settings() => DecisionRequested?.Invoke(ConnectionRecoveryDecision.OpenSettings);
         public void RequestBack() => Cancel();
         private void Cancel() => DecisionRequested?.Invoke(ConnectionRecoveryDecision.Cancel);
-        public void Render(ConnectionRecoveryPrompt prompt, bool settingsSupported, string buttonLabel)
+        public void Render(ConnectionRetryState state, bool settingsSupported, string buttonLabel)
         {
+            var prompt = state.Prompt;
             canRetry = prompt.CanRetry;
             titleText.text = offlineTitle;
             messageText.text = !canRetry ? exhaustedMessage : prompt.Message switch
@@ -56,9 +61,11 @@ namespace Dreamy.Connectivity
             };
             settingsButton.gameObject.SetActive(settingsSupported);
             settingsLabel.text = buttonLabel ?? "Settings";
+            if (state.ConnectionAvailable.HasValue)
+                messageText.text = state.ConnectionAvailable.Value ? connectionAvailableMessage : connectionUnavailableMessage;
+            SetBusy(!state.IsWaiting);
         }
-        public void SetStatus(string message) { if (this != null && messageText != null) messageText.text = message; }
-        public void SetBusy(bool busy)
+        private void SetBusy(bool busy)
         {
             if (this == null || progress == null) return;
             retryButton.interactable = !busy && canRetry;
@@ -67,6 +74,5 @@ namespace Dreamy.Connectivity
             cancelButton.interactable = true;
             progress.SetActive(busy);
         }
-        public void SetVisible(bool visible) { if (this != null) gameObject.SetActive(visible); }
     }
 }

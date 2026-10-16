@@ -30,8 +30,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 4108968927484763465}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &851421385870761749
@@ -58,123 +57,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99a528c5bc7d755da9fbc88ad0a349a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Dreamy.Connectivity.Feature::Dreamy.Connectivity.ConnectivityRoot
-  retryPanel: {fileID: 6175804849985360280}
+  retryPanelAddress: Panel/ConnectionRetryPanel.prefab
   lifecycle: {fileID: 851421385870761749}
   initializeOnStart: 1
+  checkConnectionOnStart: 0
+  simulateConnectionLossOnStart: 0
   targetId: default
   healthUrl: 
   expectedStatus: 204
   expectedBody: 
---- !u!1001 &1841884709003091170
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 5400889965779017096}
-    m_Modifications:
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_Pivot.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8743746911744343705, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-      propertyPath: m_Name
-      value: ConnectionRetryPanel
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
---- !u!224 &4108968927484763465 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 2344771332052517291, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-  m_PrefabInstance: {fileID: 1841884709003091170}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6175804849985360280 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5493104739247279482, guid: 6908ff9d2f4087671aea7ffd60f359ec, type: 3}
-  m_PrefabInstance: {fileID: 1841884709003091170}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79e9aa7230a098868ab6ddbee2e87e2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Dreamy.Connectivity.UI::Dreamy.Connectivity.ConnectionRetryPanel

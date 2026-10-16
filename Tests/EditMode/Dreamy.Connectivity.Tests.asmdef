@@ -3,9 +3,7 @@
   "rootNamespace": "Dreamy.Connectivity",
   "references": [
     "Dreamy.Connectivity.Runtime",
-    "UniTask",
-    "Dreamy.Connectivity.UI",
-    "Dreamy.Connectivity.Unity"
+    "UniTask"
   ],
   "includePlatforms": [
     "Editor"

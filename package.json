@@ -2,7 +2,7 @@
   "name": "com.dreamy.connectivity",
   "version": "0.1.0",
   "displayName": "Dreamy Connectivity",
-  "description": "Injectable connectivity checks, safe action recovery and mobile settings with production UI integration.",
+  "description": "Injectable connectivity checks, safe action recovery and mobile settings. Optional production UI integration is provided as a sample.",
   "unity": "6000.0",
   "author": {
     "name": "Dreamy Game Studio"
@@ -10,15 +10,13 @@
   "license": "UNLICENSED",
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
-    "com.dreamy.ui": "1.0.5",
-    "com.unity.ugui": "2.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0"
   },
   "samples": [
     {
       "displayName": "Connectivity Feature",
-      "description": "Production composition, Retry panel prefab and host gateway integration. No simulated network.",
+      "description": "Production UI/root integration and Feature-base Retry prefab. Requires Dreamy UI, Dreamy Feature and UGUI installed separately.",
       "path": "Samples~/Connectivity Feature"
     },
     {
