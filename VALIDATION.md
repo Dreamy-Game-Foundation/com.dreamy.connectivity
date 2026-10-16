@@ -1,3 +1,14 @@
+# v0.1.1 source release review — 2026-10-16
+
+- Diagnostics owns its Retry instance/model/presenter directly; no PanelManager or Addressables required by the diagnostics scene.
+- Connectivity Runtime/UI EditMode: 35/35 passed, job `7e56e8810c7d4a5fadc3a628e9de562d`.
+- Manual Play Mode checks passed: offline preflight, retry after recovery exactly once, cancel, timeout, server error, unknown outcome, and disable/re-enable cleanup.
+- Imported and distributable Diagnostics source/assets match. Package boundary/metadata validation passed.
+- Expanded UI/Connectivity run had the same five UI PanelPresenterTests failures reproduced with the original SafeArea code (baseline job `71670e48942445d59fde267b334b0057`). Native OS Settings remains unverified on devices.
+- Historical review entries below describe previous baselines.
+
+---
+
 # Local source tag v0.1.0 review — 2026-10-16
 
 - Targeted package Unity EditMode suites: 128/128 passed, no skips, job `3ac312a96d2f4c54955357f20b834ab8` (combined Economy/Shop/Progression/Connectivity suites).

@@ -1,11 +1,11 @@
 # Dreamy Connectivity
 
 Reusable connectivity checks, foreground action recovery and Android/iOS settings.
-Version `0.1.0`, Unity 6000.0+. Domain is engine independent; gateways and UI are replaceable.
+Version `0.1.1`, Unity 6000.0+. Domain is engine independent; gateways and UI are replaceable.
 
 ## Install and import
 
-Install `package.json` from disk, or use a pinned commit from `https://github.com/Dreamy-Game-Foundation/com.dreamy.connectivity.git`. This sandbox uses the Git submodule at `LocalPackages/com.dreamy.connectivity` through `file:../LocalPackages/com.dreamy.connectivity`. Local source tag `v0.1.0` identifies this reviewed baseline; native/device gates remain in VALIDATION.md.
+Install `package.json` from disk, or use a pinned commit from `https://github.com/Dreamy-Game-Foundation/com.dreamy.connectivity.git`. This sandbox uses the Git submodule at `LocalPackages/com.dreamy.connectivity` through `file:../LocalPackages/com.dreamy.connectivity`. Release tag `v0.1.1` identifies this reviewed source; native/device gates remain in VALIDATION.md.
 
 Package dependencies: UniTask 2.5.10+, UnityWebRequest and AndroidJNI modules. **Installing Connectivity does not install Dreamy UI, Dreamy Feature or UGUI.** All panel code, its presenter/composition and UI tests are shipped under `Samples~`, so they are not compiled unless imported.
 
@@ -58,7 +58,7 @@ var actions = new ConnectivityActionRunner(service, yourRecoveryUI,
 
 ## Quick start
 
-Your scene needs a Canvas with one `PanelManager`, plus one EventSystem configured for its active Input System (as with other UGUI panels). The diagnostics scene supplies one; the production prefab intentionally reuses the game’s EventSystem.
+Your scene needs a Canvas with one `PanelManager`, plus one EventSystem configured for its active Input System (as with other UGUI panels). The standalone diagnostics scene supplies its own Canvas/EventSystem and manages the Retry view directly; the production prefab intentionally reuses the game’s EventSystem.
 
 Drop `ConnectivityRoot.prefab` into that scene; set its panel address; the root resolves the existing PanelManager singleton, then execute network actions through it. Initialize the shared presenter factory in GameInstaller before opening panels:
 
@@ -143,11 +143,11 @@ References: [Unity reachability](https://docs.unity3d.com/6000.0/Documentation/S
 
 ## Diagnostics
 
-Import **Connectivity Diagnostics** separately to test Loss, Recovery, Timeout, Server Error, Unknown Outcome and Cancel. It uses the same production service/presenter/prefab with a simulated gateway. Keep this sample out of release scenes/builds. The production sample does not reference its assembly.
+Import **Connectivity Diagnostics** separately to test Loss, Recovery, Timeout, Server Error, Unknown Outcome and Cancel. It uses the production service/presenter with a simulated gateway and a scene-owned diagnostic Retry view. Keep this sample out of release scenes/builds. The production sample does not reference its assembly.
 
 Open `Scenes/ConnectivityDiagnostics.unity`, Play, choose **Connection Loss → Run Action → Recover Connection → Retry**. Result should be Succeeded, attempts 1. On this sandbox, disable “Play from Bootstrap” or select this scene as the Play Mode start scene; otherwise the existing toolbar starts the game bootstrap instead.
 
-The diagnostics scene references the panel prefab in Connectivity Feature: import Feature first. Samples ship ready-made prefabs and a diagnostics scene; no Editor builder is included. Customize project-owned prefab variants. Source of truth is `Samples~`.
+The diagnostics view uses the panel/presenter scripts in Connectivity Feature: import Feature first. Samples ship ready-made prefabs and a diagnostics scene; no Editor builder is included. Customize project-owned prefab variants. Source of truth is `Samples~`.
 
 ## Assemblies and validation
 
@@ -186,10 +186,10 @@ This uses the consumer's resolved local UniTask and creates an isolated temporar
 
 `ConnectionRecoveryPresenter` is now `ConnectionRetryPresenter`; `IConnectionRecoveryView` is now `IConnectionRetryView`. Their script metadata is retained. The presenter implements `IPanelPresenter`; the runtime `IConnectionRecoveryUI` contract is unchanged. `ConnectivityFeatureInstaller.Install` now takes the shared factory and a recovery UI creation callback. Replace old address/manager overloads with the composition example above.
 
-Root/diagnostic serialization uses the string `retryPanelAddress`; the UI root resolves PanelManager from its existing singleton, without an Inspector reference. Install after UI bootstrap (the supplied roots use Start). The installer itself can run without a scene PanelManager when supplied with a custom recovery UI. Older imported samples should use the current supplied prefabs/scene and remove obsolete pre-instantiated Retry panels. The diagnostics-only panel variant leaves simulation buttons clickable; production retains its full modal blocker.
+Production root serialization uses the string `retryPanelAddress`; the UI root resolves PanelManager from its existing singleton, without an Inspector reference. Install the production root after UI bootstrap (its Start initializes the feature). The standalone diagnostics root instead binds a scene Retry instance directly in Awake. The installer itself can run without a scene PanelManager when supplied with a custom recovery UI. Older production imports should remove obsolete pre-instantiated Retry panels; Diagnostics 0.1.1 intentionally keeps an inactive scene-owned instance. The independent diagnostics panel leaves simulation buttons clickable; production retains its full modal blocker.
 
 ## Retry panel Addressables path
 
 Root Inspector uses Retry Panel Address. Only the UI root and ConnectionRetryPanelGateway know the string address and PanelManager. Pass a callback constructing that adapter to the installer, as shown above. Existing consumers passing an address or manager to Install must move them into that callback. Install registers the presenter without loading UI; the supplied adapter calls `PanelManager.Show<ConnectionRetryPanel>(address)` during recovery. PanelManager and its asset loader retain their existing loading/caching ownership.
 
-Add the production Retry prefab to a **local** Addressables group as `Panel/ConnectionRetryPanel.prefab`. The diagnostics variant uses `UI/ConnectionRetryDiagnosticsPanel` (separate scene/manager scope). These keys are defaults, not hard-coded requirements: set the root field or pass your game's key. Rebuild Addressables content/catalog for player builds. A recovery panel stored only remotely may fail to load precisely when offline, so ship its prefab and dependencies locally. Importing samples does not modify another project's Addressables settings; register those entries in the consuming project. The sandbox entries are configured in Connectivity Samples (Local).
+Add the production Retry prefab to a **local** Addressables group as `Panel/ConnectionRetryPanel.prefab`. The standalone diagnostics scene holds a direct reference to its local Retry instance and requires no Addressables entry. These keys are defaults, not hard-coded requirements: set the root field or pass your game's key. Rebuild Addressables content/catalog for player builds. A recovery panel stored only remotely may fail to load precisely when offline, so ship its prefab and dependencies locally. Importing samples does not modify another project's Addressables settings; register those entries in the consuming project. The sandbox entries are configured in Connectivity Samples (Local).

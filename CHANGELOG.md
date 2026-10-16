@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1] - 2026-10-16
+
+- Make the Diagnostics scene own and toggle its Retry view directly, without PanelManager or Addressables navigation.
+- Separate simulation controls from the recovery dialog, use responsive action rows, and preserve button bindings in an independent diagnostics prefab.
+- Refresh connectivity per action, report simulation recovery without dispatching automatically, and restore Run after owner re-enable.
+- Verify 35 Connectivity EditMode tests and manual recovery/cancel/timeout/server-error/unknown-outcome flows; existing UI presenter test failures and native Settings device verification remain open.
+
 ## [0.1.0] - 2026-10-16
 
 - Consolidate the current implementation for a local source release; clean UI consumer checks passed; native/mobile gates and the full-project UI test failures remain open.

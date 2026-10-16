@@ -8,10 +8,7 @@
     "UniTask",
     "Unity.TextMeshPro",
     "UnityEngine.UI",
-    "Dreamy.UI.Runtime",
-    "Dreamy.UI.Presentation",
-    "Dreamy.Core.Runtime",
-    "Dreamy.Connectivity.Feature"
+    "Dreamy.UI.Runtime"
   ],
   "includePlatforms": [],
   "noEngineReferences": false

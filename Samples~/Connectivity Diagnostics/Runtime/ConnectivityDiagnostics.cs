@@ -4,14 +4,13 @@ using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Dreamy.UI;
 
 namespace Dreamy.Connectivity.Diagnostics
 {
     /// <summary>Development-only simulation controls. Never installed by Connectivity Feature.</summary>
     public sealed class ConnectivityDiagnostics : MonoBehaviour
     {
-        [SerializeField] private string retryPanelAddress = "UI/ConnectionRetryDiagnosticsPanel";
+        [SerializeField] private ConnectionRetryPanel retryPanel;
         [SerializeField] private ConnectivityLifecycle lifecycle;
         [SerializeField] private TMP_Text statusText;
         [SerializeField] private Button runButton;
@@ -33,12 +32,53 @@ namespace Dreamy.Connectivity.Diagnostics
             }
         }
         private DiagnosticGateway gateway;
-        private ConnectivityFeature feature;
+        private ConnectivityService service;
+        private ConnectionRetryModel retryModel;
+        private SceneRecoveryUI recoveryUI;
+        private ConnectivityActionRunner actions;
+        private readonly CancellationTokenSource lifetime = new();
+        private int resumeVersion;
+
+        // The diagnostics scene owns visibility and presenter lifetime directly.
+        // Do not call UIPanel.Init/Show/Hide: those are PanelManager navigation APIs.
+        private sealed class SceneRecoveryUI : IConnectionRecoveryUI, IDisposable
+        {
+            private readonly ConnectionRetryPanel view;
+            private readonly ConnectionRetryModel model;
+            private readonly ConnectionRetryPresenter presenter;
+            public event Action CancelRequested
+            {
+                add => model.CancelRequested += value;
+                remove => model.CancelRequested -= value;
+            }
+            public SceneRecoveryUI(ConnectionRetryPanel view, ConnectionRetryModel model, IConnectionSettingsGateway settings)
+            {
+                this.view = view;
+                this.model = model;
+                view.gameObject.SetActive(false);
+                presenter = new ConnectionRetryPresenter(model, view, settings.IsSupported, settings.ButtonLabel);
+            }
+            public async UniTask<ConnectionRecoveryDecision> ShowAsync(ConnectionRecoveryPrompt prompt, CancellationToken token)
+            {
+                token.ThrowIfCancellationRequested();
+                var decision = model.WaitForDecisionAsync(prompt, token);
+                view.gameObject.SetActive(true);
+                presenter.Show();
+                return await decision;
+            }
+            public void Close()
+            {
+                model.Cancel();
+                if (view != null) view.gameObject.SetActive(false);
+            }
+            public void Dispose() { Close(); presenter.Dispose(); }
+        }
         private CancellationTokenSource actionCancellation;
         private bool running;
         private int calls;
         private void OnEnable()
         {
+            runButton.interactable = !running;
             runButton.onClick.AddListener(Run); lossButton.onClick.AddListener(Loss); recoveryButton.onClick.AddListener(Recovery);
             timeoutButton.onClick.AddListener(Timeout); serverErrorButton.onClick.AddListener(ServerError);
             unknownOutcomeButton.onClick.AddListener(Unknown); cancelButton.onClick.AddListener(Cancel);
@@ -51,33 +91,60 @@ namespace Dreamy.Connectivity.Diagnostics
             unknownOutcomeButton.onClick.RemoveListener(Unknown); cancelButton.onClick.RemoveListener(Cancel);
             actionCancellation?.Cancel();
         }
-        private void Start()
+        private void Awake()
         {
+            if (retryPanel == null) throw new InvalidOperationException("Assign the scene-owned Retry panel.");
             gateway = new DiagnosticGateway();
-            if (!PanelManager.HasInstance)
-                throw new InvalidOperationException("Initialize diagnostics after the game's PanelManager UI bootstrap.");
-            var panels = PanelManager.Instance;
-            var factory = panels.PresenterFactory ?? new PanelPresenterFactory();
-            panels.PresenterFactory = factory;
-            feature = ConnectivityFeatureInstaller.Install(factory,
-                model => new ConnectionRetryPanelGateway(panels, retryPanelAddress, model), lifecycle, gateway);
+            service = new ConnectivityService(gateway);
+            retryModel = new ConnectionRetryModel();
+            var settings = new ConnectionSettingsGateway();
+            recoveryUI = new SceneRecoveryUI(retryPanel, retryModel, settings);
+            actions = new ConnectivityActionRunner(service, recoveryUI, settings, lifetime: lifetime.Token);
+            if (lifecycle != null) { lifecycle.Initialize(service); lifecycle.Resumed += OnResume; }
         }
-        private void OnDestroy() { feature?.Dispose(); feature = null; }
-        private void SetMode(Mode mode) { gateway.Current = mode; feature.Service.Invalidate(); statusText.text = "Simulated state: " + mode; }
+        private void OnResume() => RecheckAfterResumeAsync().Forget(Debug.LogException);
+        private async UniTask RecheckAfterResumeAsync()
+        {
+            int version = ++resumeVersion;
+            try
+            {
+                var result = await service.CheckAsync(new ConnectivityCheckRequest("default", forceRefresh: true), lifetime.Token);
+                if (version == resumeVersion && !lifetime.IsCancellationRequested)
+                    retryModel.ReportConnectionAvailability(result.Satisfies(ConnectivityRequirement.NetworkHintOnly));
+            }
+            catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
+        }
+        private void OnDestroy()
+        {
+            if (lifecycle != null) lifecycle.Resumed -= OnResume;
+            lifetime.Cancel();
+            recoveryUI?.Dispose();
+            retryModel?.Dispose();
+            service?.Dispose();
+            lifetime.Dispose();
+        }
+        private void SetMode(Mode mode)
+        {
+            gateway.Current = mode;
+            service.Invalidate();
+            retryModel.ReportConnectionAvailability(mode != Mode.Offline && mode != Mode.Timeout);
+            statusText.text = "Simulated state: " + mode + (running ? ". Press Retry to continue." : "");
+        }
         private void Loss() => SetMode(Mode.Offline);
         private void Recovery() => SetMode(Mode.Connected);
         private void Timeout() => SetMode(Mode.Timeout);
         private void ServerError() => SetMode(Mode.ServerError);
         private void Unknown() => SetMode(Mode.UnknownOutcome);
         private void Cancel() => actionCancellation?.Cancel();
-        private void Run() { if (!running) RunAsync().Forget(Debug.LogException); }
+        private void Run() { if (isActiveAndEnabled && !running) RunAsync().Forget(Debug.LogException); }
         private async UniTask RunAsync()
         {
             running = true; runButton.interactable = false;
+            statusText.text = "Running connection check / action...";
             actionCancellation = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
             try
             {
-                var result = await feature.Actions.ExecuteAsync("diagnostics.read", new ConnectivityCheckRequest("default"), ExecuteOperationAsync,
+                var result = await actions.ExecuteAsync("diagnostics.read", new ConnectivityCheckRequest("default", forceRefresh: true), ExecuteOperationAsync,
                     new ConnectivityRetryPolicy(ConnectivityRetrySafety.ReadOnly), actionCancellation.Token);
                 if (this != null && isActiveAndEnabled) statusText.text = $"Result: {result.Status}; attempts: {result.Attempts}; total calls: {calls}; {result.ErrorCode}";
             }

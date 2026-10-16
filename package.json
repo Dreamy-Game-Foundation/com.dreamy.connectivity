@@ -1,6 +1,6 @@
 {
   "name": "com.dreamy.connectivity",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Dreamy Connectivity",
   "description": "Injectable connectivity checks, safe action recovery and mobile settings. Optional production UI integration is provided as a sample.",
   "unity": "6000.0",
